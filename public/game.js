@@ -204,13 +204,15 @@ class DodgeballCourt {
   // Smooth Throw Launch (No Teleportation!)
   // -----------------------------------------------------------
   launchBall({ fromPlayer, toPlayer, isSpecial = false, duration = 0.45, arcHeight = 25, onArrival }) {
-    if (!fromPlayer || !toPlayer) return;
+    if (!toPlayer) return;
 
     // Release ball from hand
     this.ball.holder = null;
     this.ball.state = 'FLYING';
-    this.ball.startX = fromPlayer.x;
-    this.ball.startY = fromPlayer.y;
+
+    // Always start flight from the ball's current real x, y coordinates!
+    this.ball.startX = (typeof this.ball.x === 'number') ? this.ball.x : (fromPlayer ? fromPlayer.x : this.centerX);
+    this.ball.startY = (typeof this.ball.y === 'number') ? this.ball.y : (fromPlayer ? fromPlayer.y : this.height / 2);
     this.ball.targetX = toPlayer.x;
     this.ball.targetY = toPlayer.y;
     this.ball.progress = 0;
@@ -219,9 +221,10 @@ class DodgeballCourt {
     this.ball.isSpecial = isSpecial;
     this.ball.onArrival = onArrival;
 
+    const displayFrom = fromPlayer || { x: this.ball.startX, y: this.ball.startY };
     if (isSpecial) {
-      this.addFloatingText(fromPlayer.x, fromPlayer.y - 25, '🔥 불꽃 슛!', '#ff4444', 20);
-      this.addShockwave(fromPlayer.x, fromPlayer.y, '#ff4444');
+      this.addFloatingText(displayFrom.x, displayFrom.y - 25, '🔥 불꽃 슛!', '#ff4444', 20);
+      this.addShockwave(displayFrom.x, displayFrom.y, '#ff4444');
     }
   }
 
@@ -232,19 +235,33 @@ class DodgeballCourt {
     }
 
     if (ev.type === 'START') {
-      this.addFloatingText(this.centerX, this.height / 2, '경기 시작!', '#f59e0b', 24);
+      const jumpWinner = this.players.find(p => p.id === ev.attackerId);
+      this.addFloatingText(this.centerX, this.height / 2, '점프볼 선점!', '#f59e0b', 24);
       this.addShockwave(this.centerX, this.height / 2, '#f59e0b');
+      if (jumpWinner) {
+        this.launchBall({
+          fromPlayer: { x: this.centerX, y: this.height / 2 },
+          toPlayer: jumpWinner,
+          duration: 0.45,
+          arcHeight: 25,
+          onArrival: () => {
+            this.ball.holder = jumpWinner;
+            this.ball.state = 'HELD';
+          }
+        });
+      }
     } else if (ev.type === 'PASS') {
       const passer = this.players.find(p => p.id === ev.attackerId) || this.ball.holder;
       const receiver = this.players.find(p => p.id === ev.targetId);
 
-      if (passer && receiver) {
+      if (receiver) {
+        // High lob arc from outfield to infield or infield to outfield
         this.launchBall({
           fromPlayer: passer,
           toPlayer: receiver,
           isSpecial: false,
-          duration: 0.5,
-          arcHeight: 35,
+          duration: 0.55,
+          arcHeight: 45,
           onArrival: () => {
             this.ball.holder = receiver;
             this.ball.state = 'HELD';
