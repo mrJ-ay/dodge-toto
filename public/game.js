@@ -460,26 +460,76 @@ class DodgeballCourt {
       }
     }
 
-    // 2. Update Players Position (Smooth roaming & repositioning)
+    // 2. Dynamic Athletic Player Movement (No Static Standing!)
     this.players.forEach(p => {
-      // Micro-roam wandering when idle
-      if (Math.random() < 0.04) {
-        const roamRadius = p.role === 'inner' ? 20 : 8;
-        p.targetX = p.baseX + (Math.random() - 0.5) * roamRadius;
-        p.targetY = p.baseY + (Math.random() - 0.5) * roamRadius;
+      const isHolder = (this.ball.holder === p);
+      const isInner = (p.role === 'inner');
+      const isOuter = (p.role === 'outer');
+      const ballInMyTeam = this.ball.holder && (this.ball.holder.team === p.team);
+
+      if (isHolder) {
+        // [공격수] 공을 잡은 선수는 중앙선 쪽으로 적극 전진하여 공격 각을 잡음!
+        if (isInner) {
+          p.targetX = (p.team === 'A') ? (this.centerX - 50) : (this.centerX + 50);
+          if (this.ball.targetY) {
+            p.targetY = Math.max(this.courtTop + 45, Math.min(this.courtBottom - 45, this.ball.targetY));
+          }
+        } else {
+          // 외야수 공격수: 사이드라인 안쪽으로 바짝 전진
+          p.targetX = (p.team === 'A') ? (this.courtRight + 25) : (this.courtLeft - 25);
+          if (this.ball.targetY) {
+            p.targetY = Math.max(this.courtTop + 40, Math.min(this.courtBottom - 40, this.ball.targetY));
+          }
+        }
+      } else if (isInner) {
+        // [내야수들]
+        if (ballInMyTeam) {
+          // 아군 공격 상황: 중앙 쪽으로 전진하며 패스 각 및 서포트 위치 확보 (공격 대형)
+          const advanceOffset = (p.team === 'A') ? 50 : -50;
+          p.targetX = p.baseX + advanceOffset;
+          p.targetY = p.baseY + Math.sin(this.simTime * 3.5 + p.num) * 28;
+        } else {
+          // 상대 공격 상황 (수비 상황):
+          // 후방으로 물러나며 산개 대형 유지 (수비 대형)
+          p.targetX = p.baseX;
+          // 공의 Y축 위치를 주시하며 능동적 회피 동선 생성
+          const dy = p.y - this.ball.y;
+          if (Math.abs(dy) < 45) {
+            p.targetY = p.baseY + (dy >= 0 ? 40 : -40);
+          } else {
+            p.targetY = p.baseY + Math.sin(this.simTime * 2.5 + p.num) * 18;
+          }
+        }
+
+        // 코트 경계 유지
+        if (p.team === 'A') {
+          p.targetX = Math.max(this.courtLeft + 20, Math.min(this.centerX - 35, p.targetX));
+        } else {
+          p.targetX = Math.max(this.centerX + 35, Math.min(this.courtRight - 20, p.targetX));
+        }
+        p.targetY = Math.max(this.courtTop + 25, Math.min(this.courtBottom - 25, p.targetY));
+
+      } else if (isOuter) {
+        // [외야수들]: 외야 사이드라인을 따라 공의 Y축을 기민하게 추적 순찰 (Patrol)
+        const patrolY = Math.max(
+          this.courtTop + 40,
+          Math.min(this.courtBottom - 40, this.ball.y + Math.sin(this.simTime * 3.0 + p.num) * 50)
+        );
+        p.targetY = patrolY;
+        p.targetX = (p.team === 'A') ? (this.courtRight + 30) : (this.courtLeft - 30);
       }
 
-      p.x += (p.targetX - p.x) * 0.12;
-      p.y += (p.targetY - p.y) * 0.12;
+      // 부드러운 가속 보간 (Sprint / Dash)
+      const moveSpeed = isHolder ? 0.16 : 0.09;
+      const prevX = p.x;
+      const prevY = p.y;
+      p.x += (p.targetX - p.x) * moveSpeed;
+      p.y += (p.targetY - p.y) * moveSpeed;
 
-      // Keep within court boundaries
-      if (p.role === 'inner') {
-        if (p.team === 'A') {
-          p.x = Math.max(this.courtLeft + 15, Math.min(this.centerX - 25, p.x));
-        } else {
-          p.x = Math.max(this.centerX + 25, Math.min(this.courtRight - 15, p.x));
-        }
-        p.y = Math.max(this.courtTop + 20, Math.min(this.courtBottom - 20, p.y));
+      // 발걸음 주기 (Running bobbing animation)
+      const dist = Math.hypot(p.x - prevX, p.y - prevY);
+      if (dist > 0.25) {
+        p.runCycle = (p.runCycle || 0) + dist * 0.45;
       }
     });
 
@@ -567,7 +617,11 @@ class DodgeballCourt {
 
     // 2. Render Players
     this.players.forEach(p => {
-      // Player Shadow
+      // Running step bobbing
+      const bob = Math.abs(Math.sin(p.runCycle || 0)) * 2.5;
+      const drawY = p.y - bob;
+
+      // Player Shadow (remains on ground)
       ctx.beginPath();
       ctx.ellipse(p.x, p.y + 12, p.radius * 0.9, p.radius * 0.4, 0, 0, Math.PI * 2);
       ctx.fillStyle = 'rgba(0, 0, 0, 0.45)';
@@ -576,7 +630,7 @@ class DodgeballCourt {
       // Outer Player Ring Aura
       if (p.role === 'outer') {
         ctx.beginPath();
-        ctx.arc(p.x, p.y, p.radius + 3, 0, Math.PI * 2);
+        ctx.arc(p.x, drawY, p.radius + 3, 0, Math.PI * 2);
         ctx.strokeStyle = '#f59e0b';
         ctx.lineWidth = 1.5;
         ctx.stroke();
@@ -585,15 +639,15 @@ class DodgeballCourt {
       // Ball Possession Indicator
       if (this.ball.holder === p) {
         ctx.beginPath();
-        ctx.arc(p.x, p.y, p.radius + 5, 0, Math.PI * 2);
+        ctx.arc(p.x, drawY, p.radius + 6, 0, Math.PI * 2);
         ctx.strokeStyle = '#38bdf8';
-        ctx.lineWidth = 2;
+        ctx.lineWidth = 2.5;
         ctx.stroke();
       }
 
       // Player Body Circle
       ctx.beginPath();
-      ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+      ctx.arc(p.x, drawY, p.radius, 0, Math.PI * 2);
       ctx.fillStyle = p.color;
       ctx.fill();
       ctx.lineWidth = 2;
@@ -605,12 +659,12 @@ class DodgeballCourt {
       ctx.font = '800 12px JetBrains Mono';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
-      ctx.fillText(p.num, p.x, p.y);
+      ctx.fillText(p.num, p.x, drawY);
 
       // Name & Role Tag
       ctx.font = '600 10px Pretendard';
       ctx.fillStyle = p.role === 'outer' ? '#fbbf24' : '#cbd5e1';
-      ctx.fillText(`${p.name}${p.role === 'outer' ? ' [외야]' : ''}`, p.x, p.y - 20);
+      ctx.fillText(`${p.name}${p.role === 'outer' ? ' [외야]' : ''}`, p.x, drawY - 20);
     });
 
     // 3. Render Ball Flames
