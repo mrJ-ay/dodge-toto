@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DODGE TOTO (피구 토토) · 알고리즘 피구 & 스포츠 베팅</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700;800;900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <!-- Header Navbar -->
+  <header class="navbar">
+    <div class="nav-left">
+      <div class="logo-box">
+        <span class="logo-ball">⚾</span>
+        <div class="logo-text">
+          <span class="logo-title">DODGE TOTO</span>
+          <span class="logo-sub">알고리즘 피구 토토</span>
+        </div>
+      </div>
+      <div class="rule-badge">
+        <span class="pulse-dot"></span>
+        <span>정통 피구 룰 (내야 4 + 외야 1 · 부활 시스템)</span>
+      </div>
+    </div>
+
+    <div class="nav-right">
+      <!-- Player Balance -->
+      <div class="balance-card" id="balance-container">
+        <span class="bal-label">통합 보유 자산</span>
+        <span class="bal-val" id="user-balance">₩ 0</span>
+        <button id="btn-refresh-balance" class="btn-refresh" title="잔고 새로고침">🔄</button>
+      </div>
+
+      <!-- Auth Controls -->
+      <div id="auth-box" class="auth-box">
+        <button id="btn-login" class="btn-login">ONEID 로그인</button>
+        <button id="btn-guest" class="btn-guest">게스트 시작</button>
+      </div>
+
+      <div id="user-box" class="user-box hidden">
+        <span class="user-badge" id="user-name">선수</span>
+        <button id="btn-logout" class="btn-logout">로그아웃</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content Layout -->
+  <main class="container">
+    <!-- Top Match Header Banner -->
+    <section class="match-banner">
+      <div class="match-head-bar">
+        <span class="league-tag">🏆 2026 ALGO-DODGEBALL LEAGUE</span>
+        <span id="match-id-tag" class="match-code">MATCH #---</span>
+        <button id="btn-new-match" class="btn-new-match">🎲 다른 대진표 찾기</button>
+      </div>
+
+      <!-- Teams Face-Off Card -->
+      <div class="faceoff-grid">
+        <!-- Team A Card -->
+        <div class="team-card team-a" id="card-team-a">
+          <div class="team-top">
+            <span class="team-symbol" id="team-a-symbol">🐯</span>
+            <div class="team-meta">
+              <span class="team-role-tag">HOME TEAM</span>
+              <h2 class="team-name" id="team-a-name">불꽃 타이거즈</h2>
+            </div>
+          </div>
+          <p class="team-desc" id="team-a-desc">강력한 불꽃 슛으로 내야를 압도하는 공격형 군단</p>
+
+          <!-- Team Stats Bars -->
+          <div class="stat-bars">
+            <div class="stat-row">
+              <span class="stat-name">공격력 (Power)</span>
+              <div class="bar-track"><div class="bar-fill" id="team-a-power" style="width: 80%"></div></div>
+              <span class="stat-val" id="team-a-power-val">80</span>
+            </div>
+            <div class="stat-row">
+              <span class="stat-name">캐치율 (Catch)</span>
+              <div class="bar-track"><div class="bar-fill" id="team-a-catch" style="width: 65%"></div></div>
+              <span class="stat-val" id="team-a-catch-val">65</span>
+            </div>
+            <div class="stat-row">
+              <span class="stat-name">스피드 (Speed)</span>
+              <div class="bar-track"><div class="bar-fill" id="team-a-speed" style="width: 75%"></div></div>
+              <span class="stat-val" id="team-a-speed-val">75</span>
+            </div>
+          </div>
+
+          <!-- Roster Lineup -->
+          <div class="roster-box">
+            <div class="roster-title">출전 라인업 (내야 4 + 외야 1)</div>
+            <div class="roster-list" id="team-a-roster"></div>
+          </div>
+        </div>
+
+        <!-- VS Center Box -->
+        <div class="vs-center">
+          <div class="vs-badge">VS</div>
+          <div class="odds-summary">
+            <div class="odds-row">
+              <span class="odds-team-tag">홈 승 배당</span>
+              <span class="odds-num" id="vs-odds-a">1.85</span>
+            </div>
+            <div class="odds-row">
+              <span class="odds-team-tag">원정 승 배당</span>
+              <span class="odds-num" id="vs-odds-b">1.95</span>
+            </div>
+          </div>
+          <div class="game-status-pill" id="match-status-pill">베팅 접수 중</div>
+        </div>
+
+        <!-- Team B Card -->
+        <div class="team-card team-b" id="card-team-b">
+          <div class="team-top">
+            <span class="team-symbol" id="team-b-symbol">🐬</span>
+            <div class="team-meta">
+              <span class="team-role-tag">AWAY TEAM</span>
+              <h2 class="team-name" id="team-b-name">질풍 돌핀스</h2>
+            </div>
+          </div>
+          <p class="team-desc" id="team-b-desc">외야-내야 간 기동력과 패스워크로 허점을 찌르는 전략팀</p>
+
+          <!-- Team Stats Bars -->
+          <div class="stat-bars">
+            <div class="stat-row">
+              <span class="stat-name">공격력 (Power)</span>
+              <div class="bar-track"><div class="bar-fill" id="team-b-power" style="width: 70%"></div></div>
+              <span class="stat-val" id="team-b-power-val">70</span>
+            </div>
+            <div class="stat-row">
+              <span class="stat-name">캐치율 (Catch)</span>
+              <div class="bar-track"><div class="bar-fill" id="team-b-catch" style="width: 80%"></div></div>
+              <span class="stat-val" id="team-b-catch-val">80</span>
+            </div>
+            <div class="stat-row">
+              <span class="stat-name">스피드 (Speed)</span>
+              <div class="bar-track"><div class="bar-fill" id="team-b-speed" style="width: 85%"></div></div>
+              <span class="stat-val" id="team-b-speed-val">85</span>
+            </div>
+          </div>
+
+          <!-- Roster Lineup -->
+          <div class="roster-box">
+            <div class="roster-title">출전 라인업 (내야 4 + 외야 1)</div>
+            <div class="roster-list" id="team-b-roster"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Interactive Betting Console -->
+    <section class="betting-console">
+      <div class="console-head">
+        <h3>🎯 토토 베팅 콘솔</h3>
+        <span class="console-sub">원하는 승패 또는 기준 시간(언더/오버)을 선택하고 베팅 후 경기를 시작하세요.</span>
+      </div>
+
+      <!-- Betting Options Grid -->
+      <div class="bet-options-grid">
+        <button class="bet-opt-btn active" data-bet="win_a" id="opt-win-a">
+          <span class="opt-type">홈팀 승리</span>
+          <span class="opt-team" id="opt-team-a-title">불꽃 타이거즈</span>
+          <span class="opt-odds" id="opt-odds-a">x 1.85</span>
+        </button>
+
+        <button class="bet-opt-btn" data-bet="win_b" id="opt-win-b">
+          <span class="opt-type">원정팀 승리</span>
+          <span class="opt-team" id="opt-team-b-title">질풍 돌핀스</span>
+          <span class="opt-odds" id="opt-odds-b">x 1.95</span>
+        </button>
+
+        <button class="bet-opt-btn" data-bet="under" id="opt-under">
+          <span class="opt-type">언더 (Under)</span>
+          <span class="opt-team">경기 시간 50초 이하</span>
+          <span class="opt-odds" id="opt-odds-under">x 1.90</span>
+        </button>
+
+        <button class="bet-opt-btn" data-bet="over" id="opt-over">
+          <span class="opt-type">오버 (Over)</span>
+          <span class="opt-team">경기 시간 50초 초과</span>
+          <span class="opt-odds" id="opt-odds-over">x 1.90</span>
+        </button>
+      </div>
+
+      <!-- Bet Amount Row -->
+      <div class="bet-amount-row">
+        <div class="amount-input-box">
+          <span class="curr-sign">₩</span>
+          <input type="number" id="bet-amount" value="50000" min="1000" step="10000" />
+        </div>
+
+        <div class="quick-chips">
+          <button class="chip-btn" data-add="10000">+1만</button>
+          <button class="chip-btn" data-add="50000">+5만</button>
+          <button class="chip-btn" data-add="100000">+10만</button>
+          <button class="chip-btn" data-add="500000">+50만</button>
+          <button class="chip-btn" id="btn-chip-allin">올인</button>
+        </div>
+
+        <div class="calc-box">
+          <span class="calc-label">적중 시 예상 환급금:</span>
+          <span class="calc-val" id="expected-payout">₩ 92,500</span>
+        </div>
+      </div>
+
+      <!-- Action Button Row -->
+      <div class="action-btn-row">
+        <button id="btn-start-game" class="btn-start-match">
+          <span class="btn-match-icon">⚾</span>
+          <span class="btn-match-text">베팅 확정 & 경기 시작!</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- 2D Canvas Dodgeball Court Section -->
+    <section class="stadium-section">
+      <div class="stadium-header">
+        <div class="stadium-title">
+          <span class="stadium-icon">🏟️</span>
+          <h3>ALGO-DODGEBALL ARENA</h3>
+          <span class="stadium-badge">60 FPS 물리 엔진</span>
+        </div>
+
+        <!-- Simulation Controls -->
+        <div class="sim-controls">
+          <span class="clock-display" id="sim-clock">00:00.0</span>
+          <button class="speed-btn active" data-speed="1">1x</button>
+          <button class="speed-btn" data-speed="2">2x</button>
+          <button class="speed-btn" data-speed="4">4x</button>
+          <button class="skip-btn" id="btn-skip-sim">결과 즉시 확인 ⏭</button>
+        </div>
+      </div>
+
+      <!-- Canvas Frame -->
+      <div class="canvas-wrap">
+        <canvas id="dodgeCanvas" width="800" height="480"></canvas>
+      </div>
+
+      <!-- Live Commentary Box -->
+      <div class="commentary-box">
+        <div class="comm-badge">🎙️ 실시간 중계</div>
+        <div class="comm-text" id="live-commentary">경기가 시작되면 실시간 알고리즘 피구 플레이 중계가 표시됩니다.</div>
+      </div>
+    </section>
+
+    <!-- Ecosystem Bar -->
+    <section class="eco-bar">
+      <div class="eco-head">🔗 네온 통합 금융 & 엔터테인먼트 생태계</div>
+      <div class="eco-links">
+        <a id="link-bank" href="https://one-bank-lm2p.onrender.com" target="_blank" rel="noopener" class="eco-item">
+          <span>🏦</span> ONE BANK (통합 계좌 송금 & 파킹이자) ↗
+        </a>
+        <a id="link-slots" href="https://vegas-slots-2izy.onrender.com" target="_blank" rel="noopener" class="eco-item">
+          <span>🎰</span> 네온스트립 슬롯머신 카지노 ↗
+        </a>
+        <a id="link-nexus" href="https://nexus-exchange-l9i8.onrender.com" target="_blank" rel="noopener" class="eco-item">
+          <span>📈</span> 넥서스 증권거래소 ↗
+        </a>
+        <a id="link-jarket" href="https://jarket.onrender.com" target="_blank" rel="noopener" class="eco-item">
+          <span>🛒</span> 자켓 가상 마켓 ↗
+        </a>
+        <a id="link-atelier" href="https://atelier-j.vercel.app" target="_blank" rel="noopener" class="eco-item">
+          <span>🏛️</span> ATELIER J 전시장 ↗
+        </a>
+      </div>
+    </section>
+
+    <!-- Recent Bets History -->
+    <section class="history-section">
+      <div class="history-head">
+        <h3>📜 나의 최근 베팅 기록</h3>
+        <span class="history-sub">실시간 당첨금 자동 입금 내역</span>
+      </div>
+      <div class="table-wrap">
+        <table class="history-table">
+          <thead>
+            <tr>
+              <th>경기 번호</th>
+              <th>베팅 대진</th>
+              <th>선택 항목</th>
+              <th>베팅 금액</th>
+              <th>배당률</th>
+              <th>결과</th>
+              <th>당첨 환급금</th>
+            </tr>
+          </thead>
+          <tbody id="history-tbody">
+            <tr>
+              <td colspan="7" class="empty-row">베팅 내역이 없습니다. 경기에 참여해 보세요!</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <!-- Match Settlement Result Modal -->
+  <div id="result-modal" class="modal-overlay hidden">
+    <div class="modal-card">
+      <div class="modal-confetti" id="modal-confetti"></div>
+      <div class="modal-icon" id="modal-result-icon">🏆</div>
+      <h2 class="modal-title" id="modal-result-title">경기 종료!</h2>
+      <p class="modal-match-summary" id="modal-match-summary">불꽃 타이거즈 승리</p>
+
+      <div class="modal-payout-box" id="modal-payout-box">
+        <span class="modal-payout-label">베팅 결과:</span>
+        <span class="modal-payout-val" id="modal-payout-val">+₩ 185,000</span>
+      </div>
+
+      <div class="modal-stats-grid">
+        <div class="mstat-item">
+          <span class="mstat-k">경기 소요 시간</span>
+          <span class="mstat-v" id="mstat-duration">42초</span>
+        </div>
+        <div class="mstat-item">
+          <span class="mstat-k">언더/오버 결과</span>
+          <span class="mstat-v" id="mstat-underover">언더 (50초 이하)</span>
+        </div>
+        <div class="mstat-item">
+          <span class="mstat-k">총 캐치 횟수</span>
+          <span class="mstat-v" id="mstat-catches">7회</span>
+        </div>
+        <div class="mstat-item">
+          <span class="mstat-k">외야 킬 부활</span>
+          <span class="mstat-v" id="mstat-revives">2회</span>
+        </div>
+      </div>
+
+      <button id="btn-modal-close" class="btn-modal-close">확인 & 새 경기 준비</button>
+    </div>
+  </div>
+
+  <script src="game.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

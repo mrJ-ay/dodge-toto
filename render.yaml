@@ -1,0 +1,26 @@
+services:
+  - type: web
+    name: dodge-toto
+    runtime: node
+    plan: free
+    region: virginia
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: DATABASE_URL
+        sync: false
+      - key: ONEID_URL
+        value: https://oneid-icvq.onrender.com
+      - key: ONEID_CLIENT_ID
+        value: dodge-toto
+      - key: SLOTS_URL
+        value: https://vegas-slots-2izy.onrender.com
+      - key: JARKET_URL
+        value: https://jarket.onrender.com
+      - key: BANK_URL
+        value: https://one-bank-lm2p.onrender.com
+      - key: NEXUS_URL
+        value: https://nexus-exchange-l9i8.onrender.com
+      - key: ATELIER_URL
+        value: https://atelier-j.vercel.app
