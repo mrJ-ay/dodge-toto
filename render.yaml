@@ -11,7 +11,7 @@ services:
       - key: DATABASE_URL
         sync: false
       - key: ONEID_URL
-        value: https://oneid-icvq.onrender.com
+        value: https://oneid-ruddy.vercel.app
       - key: ONEID_CLIENT_ID
         value: dodge-toto
       - key: SLOTS_URL

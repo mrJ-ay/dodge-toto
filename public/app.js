@@ -342,7 +342,7 @@ function startGuestLogin() {
 }
 
 function startOneIdLogin() {
-  const oneidUrl = config.oneidUrl || 'https://oneid-icvq.onrender.com';
+  const oneidUrl = config.oneidUrl || 'https://oneid-ruddy.vercel.app';
   const clientId = config.clientId || 'dodge-toto';
   const redirectUri = encodeURIComponent(window.location.origin + window.location.pathname);
 
@@ -355,7 +355,7 @@ function startOneIdLogin() {
 
 async function handleOAuthCallback(code) {
   try {
-    const oneidUrl = config.oneidUrl || 'https://oneid-icvq.onrender.com';
+    const oneidUrl = config.oneidUrl || 'https://oneid-ruddy.vercel.app';
     const clientId = config.clientId || 'dodge-toto';
     const redirectUri = window.location.origin + window.location.pathname;
 
